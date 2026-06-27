@@ -4,11 +4,13 @@ A full-stack health club membership management system: Spring Boot + React. Runs
 
 ## Features
 
+- **JWT Auth** — Register/login, BCrypt hashing, role-based access (MEMBER / ADMIN), stateless sessions
 - **Member Management** — Register, update, and track member profiles across multiple gym locations
-- **Class Bookings** — Browse and book fitness classes with real-time availability
-- **Membership Plans** — Manage subscription tiers (monthly, quarterly, annual) with auto-renewal
-- **Admin Dashboard** — View membership analytics, revenue tracking, and occupancy metrics
-- **User Dashboard** — Personal activity log, upcoming bookings, and membership status
+- **Class Bookings** — Browse and book fitness classes with capacity + double-booking guards in a transaction
+- **Membership Plans & Payments** — Subscribe to a plan, payment recorded through a swappable payment gateway, payment history
+- **Auto-Renewal** — Scheduled job renews due subscriptions, records COMPLETED/FAILED payments, marks lapsed members PAST_DUE (idempotent, no double-charge)
+- **Admin Dashboard** — Membership analytics, revenue tracking, occupancy metrics, class management
+- **User Dashboard** — Personal activity log, upcoming bookings, profile, and membership status
 - **Multi-Location** — Support for multiple gym branches with location-specific schedules
 
 ## Tech Stack
@@ -31,7 +33,9 @@ A full-stack health club membership management system: Spring Boot + React. Runs
 
 Layered backend: `controller` → `service` → `repository`, with DTOs at the API
 boundary (entities never leak the password hash). Booking enforces capacity and
-prevents double-booking inside a transaction.
+prevents double-booking inside a transaction. Payments go through a
+`PaymentGateway` interface — a simulated gateway runs in dev, and a real
+provider (e.g. Stripe) drops in behind the same contract with no caller changes.
 
 ## Getting Started
 
@@ -59,7 +63,7 @@ npm run dev                   # starts on :5173, proxies /api to :8080
 ### Tests
 
 ```bash
-cd backend && ./mvnw test     # 7 unit + 4 integration tests
+cd backend && ./mvnw test     # 21 tests (unit + integration), all green
 ```
 
 ### Production (PostgreSQL)
@@ -82,6 +86,9 @@ SPRING_PROFILES_ACTIVE=prod \
 | POST | `/api/bookings` | member | Book a class (capacity-checked) |
 | PATCH | `/api/bookings/{id}/cancel` | member | Cancel and free the spot |
 | GET | `/api/members/me` | member | Own profile |
+| GET | `/api/plans` | member | List membership plans |
+| POST | `/api/payments/subscribe` | member | Subscribe to a plan (charges via gateway) |
+| GET | `/api/payments/me` | member | Payment history |
 | GET | `/api/admin/analytics` | admin | Revenue + occupancy metrics |
 | POST | `/api/classes` | admin | Create a class |
 
