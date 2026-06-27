@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:wptest;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+app:
+  jwt:
+    secret: testSecretKeyForJWTThatIsLongEnoughToBe256BitsForHmacSha256Algo
+    expiration-ms: 3600000
+  renewal:
+    # Keep the scheduled renewal job off in tests; renewal logic is tested by calling
+    # RenewalService directly.
+    scheduler-enabled: false
+
+server:
+  port: 0

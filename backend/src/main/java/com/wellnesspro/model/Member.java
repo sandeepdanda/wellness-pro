@@ -30,6 +30,7 @@ public class Member {
     private String phone;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private Role role = Role.MEMBER;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,11 +41,21 @@ public class Member {
     @JoinColumn(name = "location_id")
     private Location location;
 
+    @Builder.Default
     private LocalDate joinDate = LocalDate.now();
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private MemberStatus status = MemberStatus.ACTIVE;
 
+    /**
+     * When the current plan period ends and auto-renewal is due. Null means no active
+     * subscription period to renew (e.g., never subscribed). Set on subscribe, advanced
+     * by the renewal job. @Builder.Default so the builder respects this initializer.
+     */
+    @Builder.Default
+    private LocalDate renewalDate = null;
+
     public enum Role { MEMBER, ADMIN }
-    public enum MemberStatus { ACTIVE, INACTIVE, SUSPENDED }
+    public enum MemberStatus { ACTIVE, INACTIVE, SUSPENDED, PAST_DUE }
 }

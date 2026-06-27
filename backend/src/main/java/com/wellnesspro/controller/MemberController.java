@@ -1,10 +1,14 @@
 package com.wellnesspro.controller;
 
-import com.wellnesspro.model.Member;
-import com.wellnesspro.repository.MemberRepository;
+import com.wellnesspro.dto.Dtos.MemberResponse;
+import com.wellnesspro.dto.Dtos.UpdateMemberRequest;
+import com.wellnesspro.security.CurrentMember;
+import com.wellnesspro.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -12,19 +16,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberController {
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+    private final CurrentMember currentMember;
+
+    /** The authenticated member's own profile. */
+    @GetMapping("/me")
+    public MemberResponse getMyProfile(Authentication auth) {
+        return memberService.getByEmail(auth.getName());
+    }
+
+    @PatchMapping("/me")
+    public MemberResponse updateMyProfile(@RequestBody UpdateMemberRequest request, Authentication auth) {
+        return memberService.update(currentMember.requireId(auth), request);
+    }
 
     @GetMapping
-    public List<Member> getAllMembers() {
-        return memberRepository.findAll();
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<MemberResponse> getAllMembers() {
+        return memberService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Member> getMember(@PathVariable Long id) {
-        return memberRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @PreAuthorize("hasRole('ADMIN')")
+    public MemberResponse getMember(@PathVariable Long id) {
+        return memberService.getById(id);
     }
-
-    // TODO: Add update, deactivate, search by location
 }

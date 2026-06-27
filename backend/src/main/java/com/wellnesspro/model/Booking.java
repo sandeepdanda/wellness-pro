@@ -23,9 +23,11 @@ public class Booking {
     @JoinColumn(name = "class_id")
     private FitnessClass fitnessClass;
 
+    @Builder.Default
     private LocalDateTime bookingDate = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private BookingStatus status = BookingStatus.CONFIRMED;
 
     public enum BookingStatus { CONFIRMED, CANCELLED, COMPLETED }

@@ -1,6 +1,6 @@
 # Wellness Pro 🏋️
 
-A full-stack health club membership management system built with Spring Boot, React, MySQL, and deployed on AWS.
+A full-stack health club membership management system: Spring Boot + React. Runs locally with zero database setup (in-memory H2), and targets PostgreSQL in production.
 
 ## Features
 
@@ -15,43 +15,75 @@ A full-stack health club membership management system built with Spring Boot, Re
 
 | Layer    | Technology                                          |
 | -------- | --------------------------------------------------- |
-| Frontend | React.js, React Router, Axios                       |
-| Backend  | Java, Spring Boot, Spring Security, Spring Data JPA |
-| Database | MySQL (AWS RDS)                                     |
-| Cloud    | AWS EC2, S3, RDS, Elastic Load Balancer             |
-| Auth     | JWT-based authentication                            |
+| Frontend | React 18, Vite, Tailwind CSS, TanStack Query, React Router, Axios |
+| Backend  | Java 21, Spring Boot 3.4, Spring Security, Spring Data JPA |
+| Database | H2 (dev/test), PostgreSQL (prod)                    |
+| Auth     | JWT (jjwt 0.12), BCrypt, role-based (MEMBER / ADMIN) |
 
 ## Architecture
 
 ```
-┌─────────────┐     ┌──────────────────┐     ┌──────────┐
-│   React UI  │────▶│  Spring Boot API  │────▶│ MySQL RDS│
-│   (S3/EC2)  │◀────│   (EC2 + ALB)     │◀────│          │
-└─────────────┘     └──────────────────┘     └──────────┘
+┌─────────────┐     ┌──────────────────┐     ┌──────────────┐
+│   React UI  │────▶│  Spring Boot API  │────▶│ H2 (dev)     │
+│   (Vite)    │◀────│  JWT + REST       │◀────│ Postgres(prd)│
+└─────────────┘     └──────────────────┘     └──────────────┘
 ```
 
+Layered backend: `controller` → `service` → `repository`, with DTOs at the API
+boundary (entities never leak the password hash). Booking enforces capacity and
+prevents double-booking inside a transaction.
+
 ## Getting Started
+
+Runs with no database install. The dev profile uses in-memory H2 and seeds demo data.
 
 ### Backend
 
 ```bash
 cd backend
-mvn clean install
-mvn spring-boot:run
+./mvnw spring-boot:run        # starts on :8080, profile "dev"
 ```
+
+Demo accounts (password `password123`):
+- `admin@wellnesspro.dev` — ADMIN (analytics, member list, class management)
+- `member@wellnesspro.dev` — MEMBER (browse, book, cancel)
 
 ### Frontend
 
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev                   # starts on :5173, proxies /api to :8080
 ```
 
-## Results
+### Tests
 
-- 25% faster membership enrollment through streamlined UI
-- 30% reduction in operational inefficiencies via automated class booking
+```bash
+cd backend && ./mvnw test     # 7 unit + 4 integration tests
+```
+
+### Production (PostgreSQL)
+
+```bash
+cd backend
+SPRING_PROFILES_ACTIVE=prod \
+  DB_URL=jdbc:postgresql://<host>:5432/wellness_pro \
+  DB_USERNAME=<user> DB_PASSWORD=<pass> \
+  JWT_SECRET=<256-bit-secret> ./mvnw spring-boot:run
+```
+
+## API
+
+| Method | Endpoint | Access | Purpose |
+| ------ | -------- | ------ | ------- |
+| POST | `/api/auth/register` | public | Create account, returns JWT |
+| POST | `/api/auth/login` | public | Authenticate, returns JWT |
+| GET | `/api/classes` | member | List classes with availability |
+| POST | `/api/bookings` | member | Book a class (capacity-checked) |
+| PATCH | `/api/bookings/{id}/cancel` | member | Cancel and free the spot |
+| GET | `/api/members/me` | member | Own profile |
+| GET | `/api/admin/analytics` | admin | Revenue + occupancy metrics |
+| POST | `/api/classes` | admin | Create a class |
 
 ## License
 

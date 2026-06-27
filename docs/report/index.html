@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wellness Pro — Before / After Report</title>
+<style>
+  :root {
+    --bg:#0d1117; --panel:#161b22; --border:#30363d;
+    --text:#c9d1d9; --muted:#8b949e; --heading:#e6edf3;
+    --green:#3fb950; --red:#f85149; --blue:#58a6ff; --yellow:#d29922;
+    --green-bg:#0f2417; --red-bg:#2a1416;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+    line-height:1.55; padding:40px 24px 80px;
+  }
+  .wrap { max-width:1100px; margin:0 auto; }
+  h1 { color:var(--heading); font-size:30px; margin:0 0 6px; }
+  h2 { color:var(--heading); font-size:21px; margin:48px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+  h3 { color:var(--heading); font-size:15px; margin:0 0 8px; }
+  .sub { color:var(--muted); margin:0 0 8px; }
+  a { color:var(--blue); text-decoration:none; }
+  code { background:#1f2630; padding:1px 6px; border-radius:5px; font-size:12.5px; font-family:"SF Mono",Menlo,Consolas,monospace; color:#e6edf3; }
+
+  /* metric cards */
+  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:24px 0; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:18px; }
+  .card .num { font-size:30px; font-weight:700; color:var(--heading); }
+  .card .lbl { color:var(--muted); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .card .delta { font-size:12.5px; margin-top:4px; }
+  .up { color:var(--green); } .down { color:var(--red); } .flat { color:var(--muted); }
+
+  /* split panels */
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+  .pane { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--panel); }
+  .pane .head { padding:10px 14px; font-weight:600; font-size:13px; }
+  .pane.before .head { background:var(--red-bg); color:var(--red); }
+  .pane.after .head { background:var(--green-bg); color:var(--green); }
+  .pane .body { padding:14px; }
+  pre { margin:0; background:#0b0f14; border-radius:8px; padding:12px 14px; overflow-x:auto;
+        font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12px; line-height:1.5; color:#c9d1d9; }
+  .pre-red { border-left:3px solid var(--red); }
+  .pre-green { border-left:3px solid var(--green); }
+  ul.tight { margin:6px 0 0; padding-left:18px; } ul.tight li { margin:3px 0; font-size:13.5px; }
+
+  /* table */
+  table { width:100%; border-collapse:collapse; margin:14px 0; background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  th, td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); font-size:13.5px; vertical-align:top; }
+  th { background:#1c232c; color:var(--muted); font-weight:600; text-transform:uppercase; font-size:11.5px; letter-spacing:.04em; }
+  tr:last-child td { border-bottom:none; }
+  .tag { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:600; }
+  .t-done { background:var(--green-bg); color:var(--green); }
+  .t-fix { background:#2a230f; color:var(--yellow); }
+  .t-you { background:#1b2a3a; color:var(--blue); }
+
+  /* shots */
+  .shots { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+  .shot { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--panel); }
+  .shot .cap { padding:9px 14px; font-size:13px; color:var(--muted); border-bottom:1px solid var(--border); }
+  .shot img { width:100%; display:block; }
+  .shot.wide { grid-column:1 / -1; }
+
+  .phase { background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--green); border-radius:8px; padding:14px 16px; margin:10px 0; }
+  .phase .pt { color:var(--heading); font-weight:600; font-size:14px; }
+  .phase .pp { color:var(--muted); font-size:13px; margin:4px 0 0; }
+  .phase .proof { color:var(--green); font-size:12.5px; margin-top:6px; font-family:"SF Mono",Menlo,monospace; }
+
+  .note { background:#13202e; border:1px solid #1b3149; border-radius:8px; padding:12px 16px; margin:14px 0; font-size:13.5px; }
+  footer { margin-top:60px; padding-top:18px; border-top:1px solid var(--border); color:var(--muted); font-size:12.5px; }
+  .pill { display:inline-block; background:var(--green-bg); color:var(--green); border:1px solid #1d4427; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Wellness Pro — Before / After</h1>
+  <p class="sub">Health-club membership system. Took the least-implemented project in <code>~/Personal</code> from a non-functional scaffold to a working, tested, full-stack app.</p>
+  <p><span class="pill">✓ build green</span> &nbsp; <span class="pill">✓ 17 tests pass</span> &nbsp; <span class="pill">✓ 8 pages verified in browser</span></p>
+
+  <!-- HEADLINE METRICS -->
+  <div class="cards">
+    <div class="card">
+      <div class="lbl">Backend Java files</div>
+      <div class="num">41</div>
+      <div class="delta up">▲ from 17 (+24)</div>
+    </div>
+    <div class="card">
+      <div class="lbl">Backend tests</div>
+      <div class="num">17</div>
+      <div class="delta up">▲ from 0</div>
+    </div>
+    <div class="card">
+      <div class="lbl">Frontend pages</div>
+      <div class="num">8</div>
+      <div class="delta up">▲ from 4 stubs</div>
+    </div>
+    <div class="card">
+      <div class="lbl">Working end-to-end</div>
+      <div class="num">Yes</div>
+      <div class="delta up">▲ from broken</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>The core problem before:</strong> the frontend logged in against <code>/api/auth/login</code> and <code>/api/auth/register</code> — endpoints that <strong>did not exist</strong>. Spring Security + JWT were declared as dependencies but had zero implementing code. The app could not authenticate a single user. It is now functional from login through booking through admin analytics.
+  </div>
+
+  <!-- STATE: BEFORE / AFTER -->
+  <h2>System state</h2>
+  <div class="split">
+    <div class="pane before">
+      <div class="head">● BEFORE — scaffold</div>
+      <div class="body">
+        <ul class="tight">
+          <li>6 JPA entities, 6 repositories</li>
+          <li>4 controllers calling repos directly — no service layer</li>
+          <li><strong>No security code</strong> (deps only), no JWT, no auth endpoints</li>
+          <li>Entities serialized to JSON → <span class="down">password hashes leaked</span></li>
+          <li>No DTOs, no validation, no exception handling</li>
+          <li>Booking: <code>save()</code> with a <code>// TODO: check capacity</code></li>
+          <li>No tests. No analytics. No seed data.</li>
+          <li>Frontend: deprecated CRA, 4 unstyled stub pages</li>
+          <li>Spring Boot 3.2 / Java 17 — won't compile on local JDK 24</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pane after">
+      <div class="head">● AFTER — working app</div>
+      <div class="body">
+        <ul class="tight">
+          <li>Layered: <code>controller → service → repository</code></li>
+          <li>JWT auth both ends, BCrypt, role-based (MEMBER / ADMIN)</li>
+          <li>Response DTOs — <span class="up">password never leaves the server</span></li>
+          <li>Bean validation + global exception handler (consistent JSON errors)</li>
+          <li>Capacity-aware booking: full / double-book / past-class all rejected</li>
+          <li>Admin analytics: revenue, occupancy, top classes</li>
+          <li>Plan subscription + simulated payments + payment history</li>
+          <li>Admin class management (create / delete) — gated to ADMIN</li>
+          <li>10 unit + 7 integration tests, all green</li>
+          <li>Vite + Tailwind + TanStack Query, 8 designed pages</li>
+          <li>Spring Boot 3.4 / Java 21, H2 dev + Postgres prod, clone-and-run</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKING LOGIC DIFF -->
+  <h2>Example: the booking endpoint</h2>
+  <div class="split">
+    <div class="pane before">
+      <div class="head">● BEFORE — BookingController.java</div>
+      <div class="body">
+<pre class="pre-red">@PostMapping
+public ResponseEntity&lt;Booking&gt; createBooking(
+        @RequestBody Booking booking) {
+    // TODO: Check capacity, validate
+    //       member, prevent double-booking
+    return ResponseEntity.ok(
+        bookingRepository.save(booking));
+}</pre>
+        <ul class="tight"><li>Takes a raw entity off the wire</li><li>No auth — any caller, any member id</li><li>No capacity / duplicate checks</li></ul>
+      </div>
+    </div>
+    <div class="pane after">
+      <div class="head">● AFTER — BookingService.book()</div>
+      <div class="body">
+<pre class="pre-green">@Transactional
+public BookingResponse book(Long memberId, Long classId) {
+    var member = memberRepo.findById(memberId)...;
+    var cls = classRepo.findById(classId)...;
+    if (cls.getSchedule().isBefore(now()))
+        throw new ConflictException("already started");
+    if (cls.getCurrentEnrollment() >= cls.getMaxCapacity())
+        throw new ConflictException("That class is full");
+    if (bookingRepo.existsBy...Confirmed(memberId, classId))
+        throw new ConflictException("already have a booking");
+    cls.setCurrentEnrollment(cls.getCurrentEnrollment() + 1);
+    ...
+}</pre>
+        <ul class="tight"><li>memberId from the JWT, not the body</li><li>3 guards, atomic enrollment increment</li><li>Returns a DTO, not the entity</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE UI -->
+  <h2>Live UI (captured from the running app)</h2>
+  <p class="sub">Spa / zen visual direction: earthy sage + clay palette, generous whitespace, fitness-tracker stat cards.</p>
+  <div class="shots">
+    <div class="shot">
+      <div class="cap">Login — login + register toggle, demo credentials</div>
+      <img src="img/login.png" alt="Login page" />
+    </div>
+    <div class="shot">
+      <div class="cap">Member dashboard — stats, next session, membership</div>
+      <img src="img/dashboard.png" alt="Dashboard" />
+    </div>
+    <div class="shot wide">
+      <div class="cap">Classes — browse, availability bars, capacity-aware booking</div>
+      <img src="img/classes.png" alt="Classes" />
+    </div>
+    <div class="shot">
+      <div class="cap">Plans — subscribe, current plan highlighted, per-month math</div>
+      <img src="img/plans.png" alt="Plans" />
+    </div>
+    <div class="shot">
+      <div class="cap">Profile — edit details + payment history</div>
+      <img src="img/profile.png" alt="Profile" />
+    </div>
+    <div class="shot wide">
+      <div class="cap">Admin dashboard — revenue, occupancy, top classes, members (role-gated)</div>
+      <img src="img/admin.png" alt="Admin" />
+    </div>
+    <div class="shot wide">
+      <div class="cap">Admin · Manage classes — create form + delete, enrollment badges (ADMIN only)</div>
+      <img src="img/manage-classes.png" alt="Manage classes" />
+    </div>
+  </div>
+
+  <!-- PHASES -->
+  <h2>What got built — 10 phases</h2>
+  <p class="sub">Phases 0–5: scaffold → working app. Phases 6–9 (this round): finished every backend capability that had no UI, plus the missing payments vertical.</p>
+  <div class="phase"><div class="pt">Phase 0 · Toolchain + build baseline</div><div class="pp">Spring Boot 3.2→3.4, Java 21, Maven wrapper, H2-dev / Postgres-prod profiles.</div><div class="proof">✓ mvn clean compile — exit 0</div></div>
+  <div class="phase"><div class="pt">Phase 1 · Security + JWT auth</div><div class="pp">SecurityConfig (stateless, BCrypt), JwtService/Filter, UserDetails from Member, AuthController. Closes the frontend's broken auth calls.</div><div class="proof">✓ register→201+JWT · login→JWT · no-token→403</div></div>
+  <div class="phase"><div class="pt">Phase 2 · Service layer + DTOs + booking logic</div><div class="pp">Services for every domain, request/response DTOs, validation, capacity + double-booking guards, global exception handler.</div><div class="proof">✓ full→409 · double-book→409 · password not leaked</div></div>
+  <div class="phase"><div class="pt">Phase 3 · Admin analytics + seed data</div><div class="pp">AnalyticsService (revenue, occupancy, top classes), AdminController, dev DataSeeder with demo admin + member.</div><div class="proof">✓ analytics aggregates · member→admin route→403</div></div>
+  <div class="phase"><div class="pt">Phase 4 · Backend tests</div><div class="pp">JUnit 5 + Mockito unit tests for booking edge cases; MockMvc integration tests for auth + booking against H2.</div><div class="proof">✓ first round: 11 tests green</div></div>
+  <div class="phase"><div class="pt">Phase 5 · Frontend rebuild</div><div class="pp">CRA → Vite + Tailwind + TanStack Query. Auth context, protected routes, 5 pages, spa/zen design.</div><div class="proof">✓ vite build — exit 0 · driven in browser</div></div>
+  <div class="phase" style="border-left-color:#58a6ff"><div class="pt">Phase 6 · Payments + plan subscription (backend)</div><div class="pp">SubscriptionService: subscribe records a COMPLETED payment + attaches the plan, one transaction. PaymentController for history. Wired into analytics revenue.</div><div class="proof">✓ subscribe→plan attached · payment recorded · history newest-first</div></div>
+  <div class="phase" style="border-left-color:#58a6ff"><div class="pt">Phase 7 · Admin class management (backend)</div><div class="pp">Added <code>PUT /api/classes/{id}</code> (update with enrollment guard); confirmed POST/DELETE. All gated to ADMIN.</div><div class="proof">✓ member→create→403 · admin→create→201</div></div>
+  <div class="phase" style="border-left-color:#58a6ff"><div class="pt">Phase 8 · Frontend — Plans, Profile, Class management</div><div class="pp">3 new pages: Plans (subscribe), Profile (edit + payment history), Manage Classes (create/delete). Surfaces every backend capability. Nav + routes wired.</div><div class="proof">✓ vite build — 143 modules, exit 0</div></div>
+  <div class="phase" style="border-left-color:#58a6ff"><div class="pt">Phase 9 · Tests + verify + report</div><div class="pp">SubscriptionService unit tests + subscription/RBAC integration tests. Full suite green. All 8 pages browser-verified, screenshots recaptured.</div><div class="proof">✓ Tests run: 17, Failures: 0, Errors: 0</div></div>
+
+  <!-- BUGS FOUND -->
+  <h2>Bugs found &amp; fixed (not just feature-adding)</h2>
+  <table>
+    <tr><th>Bug</th><th>Root cause</th><th>Fix</th><th></th></tr>
+    <tr><td>Compile failed — Lombok setters missing</td><td>JDK 24: Lombok wasn't registered as an annotation processor</td><td>Explicit <code>annotationProcessorPaths</code> + Lombok 1.18.38</td><td><span class="tag t-fix">fixed</span></td></tr>
+    <tr><td><code>joinDate / status / role</code> came back null</td><td><code>@Builder</code> ignores field initializers</td><td><code>@Builder.Default</code> on 3 entities</td><td><span class="tag t-fix">fixed</span></td></tr>
+    <tr><td>Password hash exposed in API responses</td><td>Controllers returned <code>@Data</code> entities directly</td><td>Response DTOs at the API boundary</td><td><span class="tag t-fix">fixed</span></td></tr>
+    <tr><td>Integration test FK violation on re-seed</td><td><code>deleteAll()</code> in wrong order</td><td>Delete bookings before classes/locations</td><td><span class="tag t-fix">fixed</span></td></tr>
+  </table>
+
+  <!-- HANDOVER -->
+  <h2>Handover — your driver's seat</h2>
+  <table>
+    <tr><th>Item</th><th>Status</th></tr>
+    <tr><td>Backend: auth, services, DTOs, analytics, payments, subscription, class mgmt, tests</td><td><span class="tag t-done">done</span></td></tr>
+    <tr><td>Frontend: 8 pages — member + admin flows, all backend capabilities surfaced</td><td><span class="tag t-done">done</span></td></tr>
+    <tr><td>No dead code: every API function and backend endpoint is now wired to UI</td><td><span class="tag t-done">done</span></td></tr>
+    <tr><td>README rewritten to match the real app</td><td><span class="tag t-done">done</span></td></tr>
+    <tr><td>Review the diff, then <code>git add / commit</code> (left to you per your rules)</td><td><span class="tag t-you">needs you</span></td></tr>
+    <tr><td>Optional follow-ups: Docker Compose, CI, real payment gateway, auto-renewal cron</td><td><span class="tag t-you">your call</span></td></tr>
+  </table>
+
+  <h3 style="margin-top:24px;">Run it yourself</h3>
+<pre>cd wellness-pro/backend && ./mvnw spring-boot:run     <span style="color:#8b949e"># :8080, seeds demo data</span>
+cd wellness-pro/frontend && npm install && npm run dev <span style="color:#8b949e"># :5173</span>
+cd wellness-pro/backend && ./mvnw test                 <span style="color:#8b949e"># 17 tests</span>
+
+<span style="color:#8b949e"># demo logins (password123):</span>
+<span style="color:#8b949e">#   admin@wellnesspro.dev  · ADMIN</span>
+<span style="color:#8b949e">#   member@wellnesspro.dev · MEMBER</span></pre>
+
+  <footer>
+    Generated for sdad · served on 127.0.0.1 · screenshots captured from the running stack (frontend :5173 → backend :8080).
+    Metrics from <code>git ls-tree</code>, <code>find</code>, and surefire reports — not estimated.
+  </footer>
+
+</div>
+</body>
+</html>

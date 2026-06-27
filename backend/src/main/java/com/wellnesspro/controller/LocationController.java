@@ -1,9 +1,10 @@
 package com.wellnesspro.controller;
 
-import com.wellnesspro.model.Location;
-import com.wellnesspro.repository.LocationRepository;
+import com.wellnesspro.dto.Dtos.LocationResponse;
+import com.wellnesspro.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -11,10 +12,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocationController {
 
-    private final LocationRepository locationRepository;
+    private final LocationService locationService;
 
     @GetMapping
-    public List<Location> getAllLocations() {
-        return locationRepository.findAll();
+    public List<LocationResponse> getAllLocations() {
+        return locationService.getAll();
     }
 }

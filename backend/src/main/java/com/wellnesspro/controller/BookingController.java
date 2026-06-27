@@ -1,10 +1,16 @@
 package com.wellnesspro.controller;
 
-import com.wellnesspro.model.Booking;
-import com.wellnesspro.repository.BookingRepository;
+import com.wellnesspro.dto.Dtos.BookingResponse;
+import com.wellnesspro.dto.Dtos.CreateBookingRequest;
+import com.wellnesspro.security.CurrentMember;
+import com.wellnesspro.service.BookingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -12,23 +18,35 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingController {
 
-    private final BookingRepository bookingRepository;
+    private final BookingService bookingService;
+    private final CurrentMember currentMember;
+
+    /** A member's own bookings, derived from the token (no memberId in the path). */
+    @GetMapping("/me")
+    public List<BookingResponse> getMyBookings(Authentication auth) {
+        return bookingService.getBookingsForMember(currentMember.requireId(auth));
+    }
 
     @GetMapping("/member/{memberId}")
-    public List<Booking> getBookingsByMember(@PathVariable Long memberId) {
-        return bookingRepository.findByMemberId(memberId);
+    public List<BookingResponse> getBookingsByMember(@PathVariable Long memberId, Authentication auth) {
+        // Members may only read their own; admins may read anyone's.
+        Long callerId = currentMember.requireId(auth);
+        if (!currentMember.isAdmin(auth) && !callerId.equals(memberId)) {
+            return bookingService.getBookingsForMember(callerId);
+        }
+        return bookingService.getBookingsForMember(memberId);
     }
 
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
-        // TODO: Check capacity, validate member, prevent double-booking
-        return ResponseEntity.ok(bookingRepository.save(booking));
+    public ResponseEntity<BookingResponse> createBooking(
+            @Valid @RequestBody CreateBookingRequest request, Authentication auth) {
+        Long memberId = currentMember.requireId(auth);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(bookingService.book(memberId, request.classId()));
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<Booking> cancelBooking(@PathVariable Long id) {
-        return bookingRepository.findById(id)
-                .map(b -> { b.setStatus(Booking.BookingStatus.CANCELLED); return ResponseEntity.ok(bookingRepository.save(b)); })
-                .orElse(ResponseEntity.notFound().build());
+    public BookingResponse cancelBooking(@PathVariable Long id, Authentication auth) {
+        return bookingService.cancel(id, currentMember.requireId(auth), currentMember.isAdmin(auth));
     }
 }

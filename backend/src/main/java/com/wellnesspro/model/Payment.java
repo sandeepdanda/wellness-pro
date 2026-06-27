@@ -21,10 +21,15 @@ public class Payment {
     private Member member;
 
     private BigDecimal amount;
+
+    private String description;  // what the payment was for, e.g. "Annual Zen plan"
+
+    @Builder.Default
     private LocalDateTime paymentDate = LocalDateTime.now();
     private String method;  // CARD, CASH, BANK_TRANSFER
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private PaymentStatus status = PaymentStatus.COMPLETED;
 
     public enum PaymentStatus { PENDING, COMPLETED, FAILED, REFUNDED }
